@@ -11,8 +11,7 @@ module.exports = Backbone.Model.extend({
       enabled: true,
       baseUrl: ''
     },
-    steamCmd: {},
-    updates: { feedUrl: '' }
+    steamCmd: {}
   },
   url: '/api/settings'
 })

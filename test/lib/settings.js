@@ -13,17 +13,6 @@ describe('Settings', function () {
     } catch (e) {}
   })
 
-  it('should migrate the legacy self-hosted update feed to GitHub', function () {
-    fs.writeFileSync(filePath, JSON.stringify({
-      steamAuth: { baseUrl: 'http://45.138.201.77:3000' },
-      updates: { feedUrl: 'http://45.138.201.77:3000/releases/latest.json' }
-    }))
-    const config = { settingsFilePath: filePath, steamAuth: {}, updates: {} }
-    const settings = new Settings(config)
-
-    settings.getPublicSettings().updates.feedUrl.should.equal('https://github.com/irkanot/Dave-Arma-Admin-Panel/releases/latest/download/latest.json')
-  })
-
   it('should save runtime settings and apply them to config', function (done) {
     const config = {
       game: 'arma3',
@@ -37,7 +26,6 @@ describe('Settings', function () {
         apiKey: 'old-api-key'
       },
       steamCmd: {},
-      updates: { feedUrl: 'http://old/releases/latest.json' },
       settingsFilePath: filePath
     }
     const settings = new Settings(config)
@@ -58,9 +46,6 @@ describe('Settings', function () {
         downloadPath: 'D:\\steam-workshop',
         username: 'anonymous',
         password: 'not-saved'
-      },
-      updates: {
-        feedUrl: 'https://updates.example.test/latest.json'
       }
     }, function (err) {
       if (err) {
@@ -78,7 +63,6 @@ describe('Settings', function () {
       config.steamCmd.should.have.property('executable', 'C:\\steamcmd\\steamcmd.exe')
       config.steamCmd.should.have.property('password', 'not-saved')
       config.steamCmd.should.have.property('steamGuardCode', '')
-      config.updates.should.have.property('feedUrl', 'https://updates.example.test/latest.json')
 
       const saved = JSON.parse(fs.readFileSync(filePath))
       saved.should.have.property('path', '/new/path')
@@ -93,7 +77,7 @@ describe('Settings', function () {
       saved.steamCmd.should.have.property('password', 'not-saved')
       saved.steamCmd.should.have.property('passwordConfigured', true)
       saved.steamCmd.should.not.have.property('steamGuardCode')
-      saved.updates.should.have.property('feedUrl', 'https://updates.example.test/latest.json')
+      saved.should.not.have.property('updates')
       done()
     })
   })

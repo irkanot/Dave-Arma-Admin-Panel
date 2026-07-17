@@ -23,7 +23,9 @@ describe('Updates', function () {
     server.listen(0, '127.0.0.1', function () {
       const port = server.address().port
       const feedUrl = 'http://127.0.0.1:' + port + '/latest.json'
-      new Updates(root, { updates: { feedUrl } }).status(function (err, status) {
+      const updates = new Updates(root, {})
+      updates.updateFeed = feedUrl
+      updates.status(function (err, status) {
         server.close()
         fs.rmSync(root, { recursive: true, force: true })
         if (err) return done(err)

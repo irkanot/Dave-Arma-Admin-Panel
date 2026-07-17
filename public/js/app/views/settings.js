@@ -45,9 +45,6 @@ module.exports = Marionette.ItemView.extend({
         username: this.$('form .steamcmd-username').val(),
         password: this.$('form .steamcmd-password').val(),
         steamGuardCode: this.$('form .steamcmd-steamguard-code').val()
-      },
-      updates: {
-        feedUrl: this.$('form .update-feed-url').val()
       }
     }
   },
