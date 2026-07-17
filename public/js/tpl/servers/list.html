@@ -1,16 +1,22 @@
 <% function size(bytes) { if (!bytes) return '0 GB'; return (bytes / 1073741824).toFixed(1) + ' GB'; } %>
 <% function duration(seconds) { var days = Math.floor((seconds || 0) / 86400); var hours = Math.floor(((seconds || 0) % 86400) / 3600); return days + 'd ' + hours + 'h'; } %>
-<% if (metrics && metrics.cpu) { %>
 <div class="panel panel-default system-metrics">
-  <div class="panel-heading"><strong>Server resources</strong> <span class="text-muted"><%- metrics.hostname %></span></div>
+  <div class="panel-heading"><strong>Server resources</strong> <% if (metrics.hostname) { %><span class="text-muted"><%- metrics.hostname %></span><% } %></div>
+  <% if (metricsLoading) { %>
+    <div class="panel-body text-muted">Loading CPU, memory and disk metrics…</div>
+  <% } else if (metricsError) { %>
+    <div class="panel-body"><div class="alert alert-danger" style="margin-bottom: 0"><strong>Metrics unavailable:</strong> <%- metricsError %></div></div>
+  <% } else if (metrics && metrics.cpu) { %>
   <div class="panel-body row text-center">
-    <div class="col-sm-3"><strong>CPU</strong><br><span class="h3"><%- metrics.cpu.usage %>%</span><br><small><%- metrics.cpu.cores %> core</small></div>
-    <div class="col-sm-3"><strong>RAM</strong><br><span class="h3"><%- size(metrics.memory.used) %></span><br><small>di <%- size(metrics.memory.total) %></small></div>
-    <div class="col-sm-3"><strong>Disco</strong><br><span class="h3"><%- size(metrics.disk.used) %></span><br><small>di <%- size(metrics.disk.total) %> · liberi <%- size(metrics.disk.available) %></small></div>
+    <% var ramPercent = metrics.memory.total ? Math.round(metrics.memory.used / metrics.memory.total * 100) : 0; %>
+    <% var diskPercent = metrics.disk.total ? Math.round(metrics.disk.used / metrics.disk.total * 100) : 0; %>
+    <div class="col-sm-3"><strong>CPU</strong><br><span class="h3"><%- metrics.cpu.usage %>%</span><div class="progress"><div class="progress-bar" style="width:<%- metrics.cpu.usage %>%"></div></div><small><%- metrics.cpu.cores %> core</small></div>
+    <div class="col-sm-3"><strong>RAM</strong><br><span class="h3"><%- ramPercent %>%</span><div class="progress"><div class="progress-bar progress-bar-info" style="width:<%- ramPercent %>%"></div></div><small><%- size(metrics.memory.used) %> di <%- size(metrics.memory.total) %></small></div>
+    <div class="col-sm-3"><strong>Disco</strong><br><span class="h3"><%- diskPercent %>%</span><div class="progress"><div class="progress-bar progress-bar-warning" style="width:<%- diskPercent %>%"></div></div><small><%- size(metrics.disk.used) %> di <%- size(metrics.disk.total) %> · liberi <%- size(metrics.disk.available) %></small></div>
     <div class="col-sm-3"><strong>Uptime</strong><br><span class="h3"><%- duration(metrics.uptime) %></span><br><small>Pannello: <%- size(metrics.panel.memory) %> RAM</small></div>
   </div>
+  <% } %>
 </div>
-<% } %>
 
 <table class="table table-striped">
   <thead>

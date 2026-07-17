@@ -22,6 +22,8 @@ module.exports = Marionette.CompositeView.extend({
     this.users = options.users
     this.session = options.session
     this.metrics = {}
+    this.metricsLoading = true
+    this.metricsError = ''
     this.refreshMetrics()
     this.metricsTimer = setInterval(this.refreshMetrics.bind(this), 5000)
   },
@@ -34,6 +36,12 @@ module.exports = Marionette.CompositeView.extend({
     const self = this
     $.get('/api/system').done(function (metrics) {
       self.metrics = metrics
+      self.metricsLoading = false
+      self.metricsError = ''
+      self.render()
+    }).fail(function (response) {
+      self.metricsLoading = false
+      self.metricsError = (response.responseJSON && response.responseJSON.error) || response.responseText || 'Unable to read server resources'
       self.render()
     })
   },
@@ -46,7 +54,9 @@ module.exports = Marionette.CompositeView.extend({
   templateHelpers: function () {
     return {
       canCreateServer: this.hasPermission('servers.create'),
-      metrics: this.metrics
+      metrics: this.metrics,
+      metricsLoading: this.metricsLoading,
+      metricsError: this.metricsError
     }
   },
 
