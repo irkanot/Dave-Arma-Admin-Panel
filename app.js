@@ -113,6 +113,8 @@ function emitInitialState (socket) {
   if (accessControl.hasPermission(user, permissions.servers.view)) {
     socket.emit('servers', manager.getServers().filter(function (server) {
       return accessControl.canAccessServer(user, server)
+    }).map(function (server) {
+      return server.toJSON()
     }))
   }
 
@@ -150,6 +152,8 @@ manager.on('servers', function () {
     const user = getSocketUser(socket)
     return manager.getServers().filter(function (server) {
       return accessControl.canAccessServer(user, server)
+    }).map(function (server) {
+      return server.toJSON()
     })
   })
 })
