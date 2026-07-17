@@ -1,0 +1,45 @@
+<nav class="navbar navbar-expand-md navbar-light bg-light fixed-top" role="navigation">
+  <div class="container">
+    <a class="navbar-brand" href="#">Arma Server Admin</a>
+    <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#main-navigation" aria-controls="main-navigation" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="main-navigation">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item <%= isActiveRoute('') %>"><a class="nav-link" href="#" id="dashboard">Dashboard</a></li>
+        <% if (can('logs.view')) { %>
+          <li class="nav-item <%= isActiveRoute('logs') %>"><a class="nav-link" href="#logs" id="logs">Logs</a></li>
+        <% } %>
+        <% if (can('missions.view')) { %>
+          <li class="nav-item <%= isActiveRoute('missions') %>"><a class="nav-link" href="#missions" id="missions">Missions</a></li>
+        <% } %>
+        <% if (can('mods.view')) { %>
+          <li class="nav-item <%= isActiveRoute('mods') %>"><a class="nav-link" href="#mods" id="mods">Mods</a></li>
+        <% } %>
+        <% if (can('users.view')) { %>
+          <li class="nav-item <%= isActiveRoute('admin') %>"><a class="nav-link" href="#admin" id="admin">Admin</a></li>
+        <% } %>
+        <% if (can('audit.view')) { %>
+          <li class="nav-item <%= isActiveRoute('audit') %>"><a class="nav-link" href="#audit" id="audit">Audit</a></li>
+        <% } %>
+        <% if (can('jobs.view')) { %>
+          <li class="nav-item <%= isActiveRoute('jobs') %>"><a class="nav-link" href="#jobs" id="jobs">Jobs</a></li>
+        <% } %>
+        <% if (can('settings.edit')) { %>
+          <li class="nav-item"><a class="nav-link" href="#" id="settings">Settings</a></li>
+        <% } %>
+        <li class="dropdown">
+          <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Servers</a>
+          <ul class="dropdown-menu" id="servers-list"></ul>
+        </li>
+        <% if (isSteamAuthEnabled() && !isAuthenticated()) { %>
+          <li class="nav-item"><a class="nav-link" href="/auth/steam" id="login-steam">Sign in with Steam</a></li>
+        <% } %>
+        <% if (isAuthenticated()) { %>
+          <li class="nav-item"><span class="navbar-text"><%- displayName() %></span></li>
+          <li class="nav-item"><a class="nav-link" href="#" id="logout">Logout</a></li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>

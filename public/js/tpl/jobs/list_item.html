@@ -1,0 +1,16 @@
+<td class="text-nowrap"><%- new Date(createdAt).toLocaleString() %></td>
+<td><code><%- type %></code></td>
+<td>
+  <% if (status === 'failed') { %>
+    <span class="badge bg-danger"><%- status %></span>
+  <% } else if (status === 'success') { %>
+    <span class="badge bg-success"><%- status %></span>
+  <% } else if (status === 'waiting_steam_guard') { %>
+    <span class="badge bg-warning text-dark">waiting steam guard</span>
+  <% } else { %>
+    <span class="badge bg-secondary"><%- status %></span>
+  <% } %>
+</td>
+<td><%- progress || 0 %>%</td>
+<td><pre class="audit-data"><%- JSON.stringify(result || error || {}, null, 2) %></pre></td>
+<td><pre class="audit-data"><%- (log || []).map(function (entry) { return entry.message }).join('\n') %></pre></td>

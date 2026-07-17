@@ -1,0 +1,37 @@
+<h2><%-title%></h2>
+
+<form>
+  <% if (canEditServer) { %>
+  <button class="btn btn-primary float-end" type="submit">
+    <span class="glyphicon glyphicon-floppy-disk"></span>
+    Save
+  </button>
+  <% } %>
+</form>
+
+<!-- Nav tabs -->
+<ul class="nav nav-tabs" style="margin-bottom: 15px;">
+  <li class="nav-item"><a class="nav-link active" href="#tab-info">Info</a></li>
+  <% if (canViewMods) { %>
+    <li class="nav-item"><a class="nav-link" href="#tab-mods">Mods</a></li>
+  <% } %>
+  <% if (canViewMissions) { %>
+    <li class="nav-item"><a class="nav-link" href="#tab-missions">Missions</a></li>
+  <% } %>
+  <li class="nav-item"><a class="nav-link" href="#tab-players">Players</a></li>
+  <% if (canEditServer) { %>
+    <li class="nav-item"><a class="nav-link" href="#tab-settings">Settings</a></li>
+  <% } %>
+</ul>
+
+<!-- Tab panes -->
+<div class="tab-content">
+  <div class="tab-pane active show" id="tab-info"></div>
+  <div class="tab-pane" id="tab-mods"></div>
+  <div class="tab-pane" id="tab-missions"></div>
+  <div class="tab-pane" id="tab-players"></div>
+  <div class="tab-pane" id="tab-settings">
+    <div id="settings"></div>
+    <div id="parameters"></div>
+  </div>
+</div>

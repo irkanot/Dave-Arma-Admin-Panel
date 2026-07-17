@@ -1,0 +1,12 @@
+<td><%- username %></td>
+<td><%- steamId %></td>
+<td><%- (roles || []).join(', ') %></td>
+<td><%- (serverIds || []).join(', ') %></td>
+<td class="text-end">
+  <% if (canEditUsers) { %>
+    <button class="btn btn-sm btn-secondary edit-user">Edit</button>
+  <% } %>
+  <% if (canDeleteUsers) { %>
+    <button class="btn btn-sm btn-danger delete-user">Delete</button>
+  <% } %>
+</td>

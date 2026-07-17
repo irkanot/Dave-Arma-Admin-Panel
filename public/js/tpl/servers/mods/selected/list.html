@@ -1,0 +1,36 @@
+<div class="server-mods-panel server-selected-mods">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <h4 class="m-0">Active Mods at Server Start</h4>
+    <span class="badge bg-secondary"><%- selectedCount %></span>
+  </div>
+  <p class="text-muted">These are the mods that will be loaded when this server starts.</p>
+
+  <% if (canEditServer) { %>
+    <form class="add-manual-mod mb-3">
+      <label for="manualModName">Add mod manually</label>
+      <div class="input-group">
+        <input type="text" class="form-control" id="manualModName" placeholder="@mod_folder_name">
+        <button class="btn btn-primary add-mod" type="submit">Add</button>
+      </div>
+      <p class="help-block">Use this for local mods that are not detected yet or custom folder names.</p>
+    </form>
+  <% } %>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Mod</th>
+        <th></th>
+      </tr>
+    </thead>
+
+    <!-- want to insert collection items, here -->
+    <tbody></tbody>
+  </table>
+
+  <% if (!selectedCount) { %>
+    <div class="alert alert-info">
+      No active mods selected for this server yet. Use Add from Installed Mods, import an HTML preset, or add a folder manually.
+    </div>
+  <% } %>
+</div>

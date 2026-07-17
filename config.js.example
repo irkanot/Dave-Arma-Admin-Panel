@@ -1,0 +1,79 @@
+module.exports = {
+  game: 'arma3', // arma3, arma2oa, arma2, arma1, cwa, ofpresistance, ofp
+  path: 'path-to-arma3-directory',
+  port: 3000,
+  host: '0.0.0.0', // Can be either an IP or a Hostname
+  type: 'linux', // Can be either linux, windows or wine
+  additionalConfigurationOptions: '', // Additional configuration options appended to server.cfg file
+  parameters: [ // Additional startup parameters used by all servers
+    '-noSound',
+    '-world=empty'
+  ],
+  serverMods: [ // Mods used exclusively by server and not shared with clients
+    '@mod1',
+    '@mod2',
+  ],
+  admins: [],
+  security: {
+    enabled: true,
+    usersFilePath: 'users.json',
+    rolesFilePath: 'roles.json',
+    users: [
+      {
+        username: '76561198000000000',
+        steamId: '76561198000000000',
+        roles: ['admin']
+      },
+      {
+        username: '76561198000000001',
+        steamId: '76561198000000001',
+        roles: ['operator']
+      },
+      {
+        username: '76561198000000002',
+        steamId: '76561198000000002',
+        roles: ['user'],
+        serverIds: []
+      }
+    ],
+    roles: {
+      admin: ['*'],
+      operator: [
+        'missions.view',
+        'missions.upload'
+      ],
+      user: [
+        'servers.view',
+        'servers.start'
+      ]
+    },
+    defaultRoles: ['user']
+  },
+  audit: {
+    filePath: 'audit.json'
+  },
+  jobs: {
+    filePath: 'jobs.json'
+  },
+  steamAuth: {
+    enabled: true,
+    baseUrl: 'http://localhost:3000',
+    sessionSecret: 'change-me',
+    apiKey: ''
+  },
+  steamCmd: {
+    executable: '', // Example Windows path: C:\\steamcmd\\steamcmd.exe
+    downloadPath: '', // Optional; defaults to <arma path>/_steamcmd_workshop
+    username: 'anonymous',
+    password: '', // Stored locally if configured through Settings
+    steamGuardCode: '' // Runtime-only one-time code when Steam Guard requires it
+  },
+  updates: {
+    feedUrl: 'https://github.com/irkanot/Dave-Arma-Admin-Panel/releases/latest/download/latest.json',
+    releaseDirectory: 'Releases'
+  },
+  prefix: "", // Prefix to all server names
+  suffix: "", // Suffix to all server names
+  logFormat: "dev", // expressjs/morgan log format
+  settingsFilePath: "settings.json", // Runtime-editable server settings saved from the admin UI
+};

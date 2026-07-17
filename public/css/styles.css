@@ -1,0 +1,30 @@
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+/* Move down content because we have a fixed navbar that is 50px tall */
+body {
+  padding-top: 70px;
+  padding-bottom: 20px;
+}
+
+.text-nowrap {
+  white-space: nowrap;
+}
+
+.audit-data {
+  margin: 0;
+  max-width: 520px;
+  white-space: pre-wrap;
+}
+
+.server-mods-panel {
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 12px;
+}
+
+.server-mods-panel table {
+  margin-bottom: 0;
+}

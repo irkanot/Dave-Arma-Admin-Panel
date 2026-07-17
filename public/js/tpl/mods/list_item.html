@@ -1,0 +1,32 @@
+<td>
+  <%-name%>
+  <% if (link) { %>
+    <a href='<%-link%>' target=_blank rel='noopener noreferrer'>
+      <%-title%>
+    </a>
+  <% } else if (title) { %>
+    <%-title%>
+  <% } %>
+  <% if (missingTarget) { %>
+    <div class="text-danger small">
+      Missing linked folder: <%-linkTarget%>
+    </div>
+  <% } %>
+</td>
+<td style="text-align: right; white-space: nowrap;">
+  <% if (missingTarget) { %>
+    <span class="text-danger">Missing</span>
+  <% } else { %>
+    <%-formattedSize%>
+  <% } %>
+</td>
+<td>
+  <% if (canDeleteMod) { %>
+    <a class="btn btn-danger btn-xs destroy ladda-button pull-right" data-style="expand-left">
+      <span class="glyphicon glyphicon-trash"></span>
+      Delete
+    </a>
+  <% } %>
+
+  <div class="clearfix"></div>
+</td>

@@ -1,0 +1,4 @@
+<td class="text-nowrap"><%- new Date(at).toLocaleString() %></td>
+<td><%- user %></td>
+<td><code><%- action %></code></td>
+<td><pre class="audit-data"><%- JSON.stringify(data || {}, null, 2) %></pre></td>

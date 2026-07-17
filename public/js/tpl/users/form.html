@@ -1,0 +1,18 @@
+<form role="form">
+  <div class="mb-3">
+    <label class="form-label">Username</label>
+    <input type="text" class="form-control username" value="<%- username %>">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">SteamID64</label>
+    <input type="text" class="form-control steam-id" value="<%- steamId %>">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Roles</label>
+    <input type="text" class="form-control roles" value="<%- (roles || []).join(', ') %>">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Allowed Server IDs</label>
+    <input type="text" class="form-control server-ids" value="<%- (serverIds || []).join(', ') %>">
+  </div>
+</form>

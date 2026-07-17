@@ -1,0 +1,17 @@
+<td style="width: 100%; word-break: break-all;">
+  <span><%-missionName%></span>
+  <span class="visible-xs visible-sm"><%-worldName%></span>
+</td>
+<td class="hidden-xs hidden-sm">
+  <%-worldName%>
+</td>
+<td>
+  <% if (canEditServer) { %>
+    <a class="btn btn-primary btn-xs add pull-right">
+      <span class="glyphicon glyphicon-plus"></span>
+      Add
+    </a>
+  <% } %>
+
+  <div class="clearfix"></div>
+</td>

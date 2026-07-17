@@ -1,0 +1,175 @@
+<div class="page-header">
+  <h1>Admin</h1>
+</div>
+
+<div class="row">
+  <div class="col-md-3">
+    <div class="panel panel-default">
+      <div class="panel-heading"><h3 class="panel-title">Panel</h3></div>
+      <div class="list-group">
+        <a class="list-group-item" href="#users">Legacy users table</a>
+        <a class="list-group-item" href="#audit">Audit log</a>
+        <a class="list-group-item" href="#jobs">Jobs</a>
+        <% if (canEditSettings) { %>
+          <a class="list-group-item" href="#" id="admin-settings">Settings</a>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading"><h3 class="panel-title">Permission catalog</h3></div>
+      <div class="panel-body">
+        <% permissions.forEach(function (permission) { %>
+          <div><code><%- permission.name %></code></div>
+        <% }) %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-9">
+    <div class="panel panel-info">
+      <div class="panel-heading"><h3 class="panel-title">Panel updates</h3></div>
+      <div class="panel-body">
+        <p>Installed version: <strong><%- update.currentVersion || 'unknown' %></strong></p>
+        <% if (update.manifestFound) { %>
+          <p>Latest release: <strong><%- update.latestVersion %></strong></p>
+          <% if (update.notes) { %><p><%- update.notes %></p><% } %>
+          <p class="text-muted">Online feed: <%- update.feedUrl %></p>
+        <% } else { %>
+          <div class="alert alert-warning"><%- update.error || update.message %></div>
+        <% } %>
+        <button class="btn btn-default" id="check-updates">Check updates</button>
+        <% if (canEditSettings && update.available) { %>
+          <button class="btn btn-success" id="install-update">Download and install update</button>
+        <% } else if (update.manifestFound && !update.available) { %>
+          <span class="text-success">Panel is up to date.</span>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading"><h3 class="panel-title">Users</h3></div>
+      <div class="panel-body">
+        <% var activeUserData = activeUser || { username: '', displayName: '', steamId: '', roles: ['user'], serverIds: [] }; %>
+        <% if ((activeUser && canEditUsers) || (!activeUser && canCreateUsers)) { %>
+        <form id="admin-user-form" class="row">
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Username</label>
+            <input class="form-control admin-username" value="<%- activeUserData.username %>" <%- activeUser ? 'readonly' : '' %>>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Display name</label>
+            <input class="form-control admin-display-name" value="<%- activeUserData.displayName || '' %>">
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label">SteamID64</label>
+            <input class="form-control admin-steam-id" value="<%- activeUserData.steamId || '' %>">
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Roles/groups</label>
+            <input class="form-control admin-user-roles" value="<%- (activeUserData.roles || []).join(', ') %>">
+          </div>
+          <div class="col-md-9 mb-3">
+            <label class="form-label">Allowed server IDs</label>
+            <input class="form-control admin-server-ids" value="<%- (activeUserData.serverIds || []).join(', ') %>">
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label">&nbsp;</label>
+            <button class="btn btn-primary form-control" type="submit"><%- activeUser ? 'Update user' : 'Create user' %></button>
+          </div>
+        </form>
+        <% } %>
+      </div>
+
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Display</th>
+            <th>SteamID64</th>
+            <th>Roles</th>
+            <th>Servers</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% users.forEach(function (user) { %>
+            <tr>
+              <td><%- user.username %></td>
+              <td><%- user.displayName || '' %></td>
+              <td><%- user.steamId || '' %></td>
+              <td><%- (user.roles || []).join(', ') %></td>
+              <td><%- (user.serverIds || []).join(', ') %></td>
+              <td class="text-end">
+                <% if (canEditUsers) { %>
+                  <button class="btn btn-sm btn-secondary edit-admin-user" data-username="<%- user.username %>">Edit</button>
+                <% } %>
+                <% if (canDeleteUsers) { %>
+                  <button class="btn btn-sm btn-danger delete-admin-user" data-username="<%- user.username %>">Delete</button>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading"><h3 class="panel-title">Groups and permissions</h3></div>
+      <div class="panel-body">
+        <% var activeRoleData = activeRole || { name: '', permissions: [] }; %>
+        <% if (canEditUsers) { %>
+        <form id="admin-role-form">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Group/role name</label>
+              <input class="form-control admin-role-name" value="<%- activeRoleData.name %>" <%- activeRole ? 'readonly' : '' %>>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label">&nbsp;</label>
+              <button class="btn btn-primary form-control" type="submit"><%- activeRole ? 'Update group' : 'Create group' %></button>
+            </div>
+          </div>
+
+          <div class="row">
+            <% permissions.forEach(function (permission) { %>
+              <div class="col-md-4">
+                <label class="checkbox-inline">
+                  <input class="admin-role-permission" type="checkbox" value="<%- permission.name %>" <%- activeRoleData.permissions.indexOf(permission.name) !== -1 ? 'checked' : '' %>>
+                  <code><%- permission.name %></code>
+                </label>
+              </div>
+            <% }) %>
+          </div>
+        </form>
+        <% } %>
+      </div>
+
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Group</th>
+            <th>Permissions</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% roles.forEach(function (role) { %>
+            <tr>
+              <td><%- role.name %></td>
+              <td><%- (role.permissions || []).join(', ') %></td>
+              <td class="text-end">
+                <% if (canEditUsers) { %>
+                  <button class="btn btn-sm btn-secondary edit-admin-role" data-name="<%- role.name %>">Edit</button>
+                <% } %>
+                <% if (canDeleteUsers) { %>
+                  <button class="btn btn-sm btn-danger delete-admin-role" data-name="<%- role.name %>">Delete</button>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
