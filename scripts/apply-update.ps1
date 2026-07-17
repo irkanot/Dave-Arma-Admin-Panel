@@ -25,9 +25,24 @@ $actualHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $packagePath).Hash
 if ($actualHash -ne $manifestData.sha256) { throw "SHA256 verification failed." }
 
 $updateRoot = Join-Path $InstallRoot '.updates'
+$statePath = Join-Path $updateRoot 'current.json'
+$logPath = Join-Path $updateRoot 'update.log'
 $backupRoot = Join-Path $updateRoot ("backups\" + $manifestData.version + '-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
 $stage = Join-Path $updateRoot ("staging\" + [Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $backupRoot,$stage -Force | Out-Null
+
+function Write-UpdateState([string]$Status, [string]$Message) {
+  [ordered]@{
+    version = $manifestData.version
+    status = $Status
+    message = $Message
+    updatedAt = (Get-Date).ToUniversalTime().ToString('o')
+    package = $manifestData.package
+  } | ConvertTo-Json | Set-Content -LiteralPath $statePath -Encoding UTF8
+}
+
+Add-Content -LiteralPath $logPath -Value "`r`n[$(Get-Date -Format o)] Starting update to $($manifestData.version) (PID $PID)"
+Write-UpdateState 'running' 'Preparing backup and installation'
 
 $runtimeFiles = @('config.js','settings.json','servers.json','users.json','roles.json','jobs.json','audit.json')
 $service = Get-CimInstance Win32_Service | Where-Object { $_.PathName -and $_.PathName.IndexOf($InstallRoot, [System.StringComparison]::OrdinalIgnoreCase) -ge 0 } | Select-Object -First 1
@@ -68,8 +83,7 @@ try {
     Pop-Location
   }
 
-  $state = [ordered]@{ version=$manifestData.version; installedAt=(Get-Date).ToUniversalTime().ToString('o'); status='installed'; package=$manifestData.package }
-  $state | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $updateRoot 'current.json') -Encoding UTF8
+  Write-UpdateState 'installed' 'Update installed successfully'
 
   if ($service) {
     Start-Service -Name $service.Name
@@ -78,11 +92,16 @@ try {
   }
   Write-Host "Update $($manifestData.version) installed successfully."
 } catch {
+  $failure = $_.Exception.Message
   Write-Host "Update failed; restoring backup." -ForegroundColor Red
   if (Test-Path -LiteralPath (Join-Path $backupRoot 'package.json')) {
     robocopy $backupRoot $InstallRoot /E /XD .updates /XF $runtimeFiles *.log | Out-Null
   }
   if ($service -and (Get-Service -Name $service.Name).Status -ne 'Running') { Start-Service -Name $service.Name }
+  elseif (-not $service -and $RestartApplication) {
+    Start-Process -FilePath 'node.exe' -ArgumentList 'app.js' -WorkingDirectory $InstallRoot -WindowStyle Hidden
+  }
+  Write-UpdateState 'failed' $failure
   throw
 } finally {
   if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }

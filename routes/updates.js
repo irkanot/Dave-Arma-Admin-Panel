@@ -1,4 +1,5 @@
 const path = require('path')
+const fs = require('fs')
 const spawn = require('child_process').spawn
 const permissions = require('../lib/security/permissions')
 
@@ -20,6 +21,10 @@ module.exports = function (updates, accessControl, auditLog) {
       updates.download(status, function (err, downloaded) {
         if (err) return res.status(502).send(err.message)
         const script = path.join(updates.projectRoot, 'scripts', 'apply-update.ps1')
+        const updateRoot = path.join(updates.projectRoot, '.updates')
+        fs.mkdirSync(updateRoot, { recursive: true })
+        const logPath = path.join(updateRoot, 'update.log')
+        const log = fs.openSync(logPath, 'a')
         const args = [
           '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', script,
           '-Manifest', downloaded.manifestPath,
@@ -27,10 +32,11 @@ module.exports = function (updates, accessControl, auditLog) {
           '-ProcessId', String(process.pid),
           '-RestartApplication'
         ]
-        const child = spawn('powershell.exe', args, { detached: true, stdio: 'ignore', windowsHide: true })
+        const child = spawn('powershell.exe', args, { detached: true, stdio: ['ignore', log, log], windowsHide: true })
         child.unref()
+        fs.closeSync(log)
         auditLog.record(req, 'updates.install', { from: status.currentVersion, to: status.latestVersion, source: status.packageUrl })
-        res.status(202).json({ accepted: true, from: status.currentVersion, to: status.latestVersion })
+        res.status(202).json({ accepted: true, from: status.currentVersion, to: status.latestVersion, log: '.updates/update.log' })
       })
     })
   })
