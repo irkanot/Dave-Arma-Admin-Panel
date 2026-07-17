@@ -33,9 +33,10 @@ module.exports = function (auth, accessControl, users, auditLog) {
     auth.passport.authenticate('steam', {
       failureRedirect: '/'
     })(req, res, function () {
-      bootstrapFirstAdmin(req, users, accessControl, auditLog)
-      syncSteamProfile(req, users)
-      res.redirect('/')
+      registerSteamUser(req, users, accessControl, auditLog, function (err) {
+        if (err) return next(err)
+        res.redirect('/')
+      })
     })
   })
 
@@ -52,27 +53,32 @@ module.exports = function (auth, accessControl, users, auditLog) {
   return router
 }
 
-function bootstrapFirstAdmin (req, users, accessControl, auditLog) {
-  if (!accessControl.enabled || !users || users.all().length > 0 || !req.user || !req.user.steamId) {
-    return
+function registerSteamUser (req, users, accessControl, auditLog, cb) {
+  if (!accessControl.enabled || !users || !req.user || !req.user.steamId) {
+    return cb()
   }
 
+  const existing = users.findBySteamId(req.user.steamId)
+  if (existing) {
+    return users.syncSteamProfile(req.user, cb)
+  }
+
+  const firstUser = users.all().length === 0
   users.create({
     username: req.user.steamId,
     displayName: req.user.displayName || req.user.steamId,
     steamId: req.user.steamId,
-    roles: ['admin']
-  }, function () {})
+    roles: [firstUser ? 'admin' : 'default']
+  }, function (err, user) {
+    if (err) return cb(err)
 
-  if (auditLog) {
-    auditLog.record(req, 'auth.bootstrapAdmin', { steamId: req.user.steamId })
-  }
-}
+    if (auditLog) {
+      auditLog.record(req, firstUser ? 'auth.bootstrapAdmin' : 'auth.register', {
+        steamId: req.user.steamId,
+        roles: user.roles
+      })
+    }
 
-function syncSteamProfile (req, users) {
-  if (!users || !req.user || !req.user.steamId) {
-    return
-  }
-
-  users.syncSteamProfile(req.user, function () {})
+    cb()
+  })
 }

@@ -71,4 +71,15 @@ describe('Users', function () {
       })
     })
   })
+
+  it('should assign the locked default role when roles are omitted', function (done) {
+    const config = { security: { usersFilePath: filePath, users: [] } }
+    const users = new Users(config)
+
+    users.create({ username: '76561198000000009', steamId: '76561198000000009' }, function (err, user) {
+      if (err) return done(err)
+      user.roles.should.eql(['default'])
+      done()
+    })
+  })
 })

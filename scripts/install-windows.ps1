@@ -230,6 +230,7 @@ module.exports = {
     users: [],
     roles: {
       admin: ['*'],
+      default: [],
       operator: [
         'missions.view',
         'missions.upload'
@@ -239,7 +240,7 @@ module.exports = {
         'servers.start'
       ]
     },
-    defaultRoles: ['user']
+    defaultRoles: ['default']
   },
   audit: {
     filePath: 'audit.json'

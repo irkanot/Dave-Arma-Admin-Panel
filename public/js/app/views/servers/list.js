@@ -1,4 +1,5 @@
 const _ = require('underscore')
+const $ = require('jquery')
 const Backbone = require('backbone')
 const Marionette = require('marionette')
 
@@ -20,6 +21,21 @@ module.exports = Marionette.CompositeView.extend({
   initialize: function (options) {
     this.users = options.users
     this.session = options.session
+    this.metrics = {}
+    this.refreshMetrics()
+    this.metricsTimer = setInterval(this.refreshMetrics.bind(this), 5000)
+  },
+
+  onBeforeDestroy: function () {
+    clearInterval(this.metricsTimer)
+  },
+
+  refreshMetrics: function () {
+    const self = this
+    $.get('/api/system').done(function (metrics) {
+      self.metrics = metrics
+      self.render()
+    })
   },
 
   hasPermission: function (permission) {
@@ -29,7 +45,8 @@ module.exports = Marionette.CompositeView.extend({
 
   templateHelpers: function () {
     return {
-      canCreateServer: this.hasPermission('servers.create')
+      canCreateServer: this.hasPermission('servers.create'),
+      metrics: this.metrics
     }
   },
 

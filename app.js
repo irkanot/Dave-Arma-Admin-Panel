@@ -85,6 +85,7 @@ app.use('/api/audit', require('./routes/audit')(auditLog, accessControl))
 app.use('/api/jobs', require('./routes/jobs')(jobs, accessControl))
 app.use('/api/steamcmd', require('./routes/steamcmd')(config, jobs, accessControl, auditLog))
 app.use('/api/updates', require('./routes/updates')(updates, accessControl, auditLog))
+app.use('/api/system', require('./routes/system')(__dirname, accessControl))
 
 function getSocketUser (socket) {
   return accessControl.getUser(socket.request)

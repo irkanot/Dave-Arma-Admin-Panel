@@ -1,3 +1,17 @@
+<% function size(bytes) { if (!bytes) return '0 GB'; return (bytes / 1073741824).toFixed(1) + ' GB'; } %>
+<% function duration(seconds) { var days = Math.floor((seconds || 0) / 86400); var hours = Math.floor(((seconds || 0) % 86400) / 3600); return days + 'd ' + hours + 'h'; } %>
+<% if (metrics && metrics.cpu) { %>
+<div class="panel panel-default system-metrics">
+  <div class="panel-heading"><strong>Server resources</strong> <span class="text-muted"><%- metrics.hostname %></span></div>
+  <div class="panel-body row text-center">
+    <div class="col-sm-3"><strong>CPU</strong><br><span class="h3"><%- metrics.cpu.usage %>%</span><br><small><%- metrics.cpu.cores %> core</small></div>
+    <div class="col-sm-3"><strong>RAM</strong><br><span class="h3"><%- size(metrics.memory.used) %></span><br><small>di <%- size(metrics.memory.total) %></small></div>
+    <div class="col-sm-3"><strong>Disco</strong><br><span class="h3"><%- size(metrics.disk.used) %></span><br><small>di <%- size(metrics.disk.total) %> · liberi <%- size(metrics.disk.available) %></small></div>
+    <div class="col-sm-3"><strong>Uptime</strong><br><span class="h3"><%- duration(metrics.uptime) %></span><br><small>Pannello: <%- size(metrics.panel.memory) %> RAM</small></div>
+  </div>
+</div>
+<% } %>
+
 <table class="table table-striped">
   <thead>
     <tr>
