@@ -70,6 +70,7 @@ module.exports = Marionette.ItemView.extend({
       type: 'PUT',
       success: function () {
         modal.close()
+        window.location.reload()
       },
       error: function (model, response) {
         sweetAlert({

@@ -13,6 +13,17 @@ describe('Settings', function () {
     } catch (e) {}
   })
 
+  it('should migrate the legacy self-hosted update feed to GitHub', function () {
+    fs.writeFileSync(filePath, JSON.stringify({
+      steamAuth: { baseUrl: 'http://45.138.201.77:3000' },
+      updates: { feedUrl: 'http://45.138.201.77:3000/releases/latest.json' }
+    }))
+    const config = { settingsFilePath: filePath, steamAuth: {}, updates: {} }
+    const settings = new Settings(config)
+
+    settings.getPublicSettings().updates.feedUrl.should.equal('https://github.com/irkanot/Dave-Arma-Admin-Panel/releases/latest/download/latest.json')
+  })
+
   it('should save runtime settings and apply them to config', function (done) {
     const config = {
       game: 'arma3',

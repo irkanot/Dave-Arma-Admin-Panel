@@ -12,8 +12,9 @@ describe('Server', function () {
 
   describe('toJSON()', function () {
     it('should include title', function () {
-      const server = new Server(null, null, { title: 'test' })
+      const server = new Server({ prefix: '[BVE] ', suffix: '' }, null, { title: 'test' })
       server.toJSON().should.have.property('title', 'test')
+      server.toJSON().should.have.property('displayTitle', '[BVE] test')
     })
   })
 
