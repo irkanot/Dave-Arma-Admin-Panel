@@ -36,6 +36,13 @@ const session = new Backbone.Model({
 })
 const layoutView = new LayoutView({ el: $body }).render()
 
+function applyServerPrefix () {
+  const prefix = settings.get('prefix') || ''
+  servers.each(function (server) {
+    server.set('displayTitle', prefix + (server.get('title') || ''))
+  })
+}
+
 module.exports = Backbone.Router.extend({
 
   routes: {
@@ -83,10 +90,12 @@ module.exports = Backbone.Router.extend({
     })
     socket.on('servers', function (_servers) {
       servers.set(_servers)
+      applyServerPrefix()
       startHistory()
     })
     socket.on('settings', function (_settings) {
       settings.set(_settings)
+      applyServerPrefix()
     })
   },
 
