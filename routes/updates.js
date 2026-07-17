@@ -20,29 +20,22 @@ module.exports = function (updates, accessControl, auditLog) {
 
       updates.download(status, function (err, downloaded) {
         if (err) return res.status(502).send(err.message)
-        const script = path.join(updates.projectRoot, 'scripts', 'apply-update.ps1')
+        const script = path.join(updates.projectRoot, 'scripts', 'update-helper.js')
         const updateRoot = path.join(updates.projectRoot, '.updates')
         fs.mkdirSync(updateRoot, { recursive: true })
         const logPath = path.join(updateRoot, 'update.log')
         const statePath = path.join(updateRoot, 'current.json')
-        const powershell = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe')
         fs.writeFileSync(statePath, JSON.stringify({
           version: status.latestVersion,
           status: 'launching',
-          message: 'Starting Windows PowerShell updater',
+          message: 'Starting external Node.js updater',
           updatedAt: new Date().toISOString(),
           package: path.basename(downloaded.packagePath)
         }, null, 2))
-        fs.appendFileSync(logPath, '\r\n[' + new Date().toISOString() + '] Launching updater with ' + powershell + '\r\n')
+        fs.appendFileSync(logPath, '\r\n[' + new Date().toISOString() + '] Launching external updater with ' + process.execPath + '\r\n')
         const log = fs.openSync(logPath, 'a')
-        const args = [
-          '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', script,
-          '-Manifest', downloaded.manifestPath,
-          '-InstallRoot', updates.projectRoot,
-          '-ProcessId', String(process.pid),
-          '-RestartApplication'
-        ]
-        const child = spawn(powershell, args, { detached: true, stdio: ['ignore', log, log], windowsHide: true })
+        const args = [script, '--manifest', downloaded.manifestPath, '--root', updates.projectRoot, '--pid', String(process.pid)]
+        const child = spawn(process.execPath, args, { detached: true, stdio: ['ignore', log, log], windowsHide: true })
         child.on('error', function (spawnError) {
           const message = 'Unable to start updater: ' + spawnError.message
           fs.appendFileSync(logPath, '[' + new Date().toISOString() + '] ' + message + '\r\n')
