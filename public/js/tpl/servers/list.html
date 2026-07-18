@@ -12,7 +12,7 @@
     <% var diskPercent = metrics.disk.total ? Math.round(metrics.disk.used / metrics.disk.total * 100) : 0; %>
     <div class="col-sm-3"><strong>CPU</strong><br><span class="h3"><%- metrics.cpu.usage %>%</span><div class="progress"><div class="progress-bar" style="width:<%- metrics.cpu.usage %>%"></div></div><small><%- metrics.cpu.cores %> core</small></div>
     <div class="col-sm-3"><strong>RAM</strong><br><span class="h3"><%- ramPercent %>%</span><div class="progress"><div class="progress-bar progress-bar-info" style="width:<%- ramPercent %>%"></div></div><small><%- size(metrics.memory.used) %> di <%- size(metrics.memory.total) %></small></div>
-    <div class="col-sm-3"><strong>Disco</strong><br><span class="h3"><%- diskPercent %>%</span><div class="progress"><div class="progress-bar progress-bar-warning" style="width:<%- diskPercent %>%"></div></div><small><%- size(metrics.disk.used) %> di <%- size(metrics.disk.total) %> · liberi <%- size(metrics.disk.available) %></small></div>
+    <div class="col-sm-3"><strong>Disco</strong><br><% if (metrics.disk.error) { %><span class="text-danger">Non disponibile</span><br><small><%- metrics.disk.error %></small><% } else { %><span class="h3"><%- diskPercent %>%</span><div class="progress"><div class="progress-bar progress-bar-warning" style="width:<%- diskPercent %>%"></div></div><small><%- size(metrics.disk.used) %> di <%- size(metrics.disk.total) %> · liberi <%- size(metrics.disk.available) %></small><% } %></div>
     <div class="col-sm-3"><strong>Uptime</strong><br><span class="h3"><%- duration(metrics.uptime) %></span><br><small>Pannello: <%- size(metrics.panel.memory) %> RAM</small></div>
   </div>
   <% } %>
