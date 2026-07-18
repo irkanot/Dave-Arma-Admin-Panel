@@ -39,13 +39,12 @@ call :log Starting package verification, backup, extraction and npm ci
 if errorlevel 1 (call :fail Node update helper failed. Review the log and rollback messages & exit /b 1)
 
 call :log Update files installed successfully
-call :log Starting portal with npm start in a new visible window
-start "Dave Arma Admin Panel" /D "%INSTALL_ROOT%" cmd.exe /k npm start
+call :log Starting portal with npm start in a hidden detached process
+powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -Command "Start-Process -FilePath 'cmd.exe' -ArgumentList '/d','/c','npm start' -WorkingDirectory '%INSTALL_ROOT%' -WindowStyle Hidden"
 if errorlevel 1 (call :fail Unable to launch npm start & exit /b 1)
 
-call :log npm start launch command accepted
+call :log Hidden npm start launch command accepted
 call :log Update runner completed successfully
-timeout /t 5 /nobreak >nul
 exit /b 0
 
 :log

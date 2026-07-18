@@ -47,7 +47,7 @@ module.exports = function (updates, accessControl, auditLog) {
           const args = ['/d', '/c', 'call', script, downloaded.manifestPath, updates.projectRoot, String(process.pid), process.execPath]
           // Do not inherit handles: Windows services and background launchers may
           // have no valid console streams, which prevents child creation.
-          const child = spawn(cmd, args, { detached: true, stdio: 'ignore', windowsHide: false })
+          const child = spawn(cmd, args, { detached: true, stdio: 'ignore', windowsHide: true })
           let answered = false
           child.once('error', function (spawnError) {
             if (answered) return
