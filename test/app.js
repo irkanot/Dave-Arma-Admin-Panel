@@ -43,6 +43,10 @@ describe('App', function () {
     protectedPath('/api/settings', done)
   })
 
+  it('should protect system metrics', function (done) {
+    protectedPath('/api/system', done)
+  })
+
   it('should serve current auth state', function (done) {
     requestPath('/api/me', /json/, done)
   })

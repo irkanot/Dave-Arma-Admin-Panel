@@ -1,7 +1,7 @@
 {
   "name": "arma-server-web-admin",
   "description": "ArmA3 Server Management Backbone.js App",
-  "version": "1.4.5",
+  "version": "1.4.6",
   "license": "MIT",
   "private": true,
   "scripts": {
