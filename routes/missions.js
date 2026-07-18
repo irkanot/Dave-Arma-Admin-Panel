@@ -28,14 +28,18 @@ module.exports = function (missionsManager, accessControl, auditLog) {
   })
 
   router.post('/', accessControl.requirePermission(permissions.missions.upload), upload.array('missions', 64), function (req, res) {
-    const missions = req.files.filter(function (file) {
-      return path.extname(file.originalname) === '.pbo'
-    })
+    const missions = req.files || []
+    const unsupported = missions.find(function (file) { return !['.pbo', '.zip'].includes(path.extname(file.originalname).toLowerCase()) })
+    if (unsupported) return res.status(400).send('Only .pbo and .zip mission files are supported')
 
     async.parallelLimit(
       missions.map(function (missionFile) {
         return function (next) {
-          missionsManager.handleUpload(missionFile, next)
+          if (path.extname(missionFile.originalname).toLowerCase() === '.zip') {
+            missionsManager.handleZipUpload(missionFile, next)
+          } else {
+            missionsManager.handleUpload(missionFile, next)
+          }
         }
       }),
       8,
@@ -43,7 +47,11 @@ module.exports = function (missionsManager, accessControl, auditLog) {
         if (err) {
           res.status(500).send(err)
         } else {
-          auditLog.record(req, 'missions.upload', { count: missions.length })
+          auditLog.record(req, 'missions.upload', {
+            count: missions.length,
+            pbo: missions.filter(function (file) { return path.extname(file.originalname).toLowerCase() === '.pbo' }).length,
+            zip: missions.filter(function (file) { return path.extname(file.originalname).toLowerCase() === '.zip' }).length
+          })
           res.status(200).json({ success: true })
         }
       }
