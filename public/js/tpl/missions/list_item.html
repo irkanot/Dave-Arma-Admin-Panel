@@ -1,3 +1,4 @@
+<% if (canDeleteMission) { %><td><input type="checkbox" class="select-item" value="<%-name%>" aria-label="Select <%-name%>"></td><% } %>
 <td style="width: 100%; word-break: break-all;">
   <a href='/api/missions/<%-encodeURI(name)%>'><%-missionName%></a>
   <span class="visible-xs visible-sm"><%-worldName%></span>

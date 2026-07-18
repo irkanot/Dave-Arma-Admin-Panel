@@ -13,6 +13,20 @@ module.exports = function (missionsManager, accessControl, auditLog) {
     res.json(missionsManager.missions)
   })
 
+  router.post('/bulk-delete', accessControl.requirePermission(permissions.missions.delete), function (req, res) {
+    const names = uniqueNames(req.body && req.body.names)
+    if (names.length === 0) return res.status(400).send('Select at least one mission')
+    if (names.length > 500) return res.status(400).send('A maximum of 500 missions can be deleted at once')
+
+    async.eachLimit(names, 4, function (name, next) {
+      missionsManager.delete(name, next)
+    }, function (err) {
+      if (err) return res.status(500).send(err.message || err)
+      auditLog.record(req, 'missions.bulkDelete', { missions: names, count: names.length })
+      res.json({ success: true, deleted: names.length })
+    })
+  })
+
   router.post('/', accessControl.requirePermission(permissions.missions.upload), upload.array('missions', 64), function (req, res) {
     const missions = req.files.filter(function (file) {
       return path.extname(file.originalname) === '.pbo'
@@ -84,4 +98,11 @@ module.exports = function (missionsManager, accessControl, auditLog) {
   })
 
   return router
+}
+
+function uniqueNames (values) {
+  if (!Array.isArray(values)) return []
+  return Array.from(new Set(values.filter(function (value) {
+    return typeof value === 'string' && value.length > 0 && value.length <= 512
+  })))
 }

@@ -1,6 +1,7 @@
 <table class="table table-striped">
   <thead>
     <tr>
+      <% if (canBulkDelete) { %><th style="width: 36px"><input type="checkbox" class="select-all-items" title="Select all visible missions"></th><% } %>
       <th>Mission</th>
       <th class="hidden-xs hidden-sm">World</th>
       <th>Size</th>
@@ -12,3 +13,8 @@
   <!-- want to insert collection items, here -->
   <tbody></tbody>
 </table>
+<% if (canBulkDelete) { %>
+  <button type="button" class="btn btn-danger delete-selected" disabled>
+    <span class="glyphicon glyphicon-trash"></span> Delete selected (<span class="selected-count">0</span>)
+  </button>
+<% } %>

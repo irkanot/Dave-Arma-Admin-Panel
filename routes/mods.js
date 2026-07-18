@@ -1,6 +1,7 @@
 const express = require('express')
 const fs = require('fs')
 const multer = require('multer')
+const async = require('async')
 const permissions = require('../lib/security/permissions')
 const fastHtml = require('../lib/mods/fastHtml')
 const steamcmdImporter = require('../lib/mods/steamcmdImporter')
@@ -12,6 +13,20 @@ module.exports = function (modsManager, accessControl, auditLog, jobs) {
 
   router.get('/', accessControl.requirePermission(permissions.mods.view), function (req, res) {
     res.send(modsManager.mods)
+  })
+
+  router.post('/bulk-delete', accessControl.requirePermission(permissions.mods.delete), function (req, res) {
+    const names = uniqueNames(req.body && req.body.names)
+    if (names.length === 0) return res.status(400).send('Select at least one mod')
+    if (names.length > 500) return res.status(400).send('A maximum of 500 mods can be deleted at once')
+
+    async.eachLimit(names, 4, function (name, next) {
+      modsManager.delete(name, next)
+    }, function (err) {
+      if (err) return res.status(500).send(err.message || err)
+      auditLog.record(req, 'mods.bulkDelete', { mods: names, count: names.length })
+      res.json({ success: true, deleted: names.length })
+    })
   })
 
   router.delete('/:mod', accessControl.requirePermission(permissions.mods.delete), function (req, res) {
@@ -92,4 +107,11 @@ module.exports = function (modsManager, accessControl, auditLog, jobs) {
   })
 
   return router
+}
+
+function uniqueNames (values) {
+  if (!Array.isArray(values)) return []
+  return Array.from(new Set(values.filter(function (value) {
+    return typeof value === 'string' && value.length > 0 && value.length <= 512
+  })))
 }

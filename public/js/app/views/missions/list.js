@@ -1,5 +1,7 @@
 const _ = require('underscore')
+const $ = require('jquery')
 const Marionette = require('marionette')
+const sweetAlert = require('sweet-alert')
 
 const ListItemView = require('app/views/missions/list_item')
 const tpl = require('tpl/missions/list.html')
@@ -11,9 +13,64 @@ module.exports = Marionette.CompositeView.extend({
   childViewContainer: 'tbody',
   template,
 
+  events: {
+    'change .select-all-items': 'selectAll',
+    'change .select-item': 'selectionChanged',
+    'click .delete-selected': 'deleteSelected'
+  },
+
   initialize: function (options) {
     this.filterValue = options.filterValue
     this.session = options.session
+  },
+
+  hasPermission: function (permission) {
+    const permissions = (this.session && this.session.get('permissions')) || []
+    return permissions.indexOf('*') !== -1 || permissions.indexOf(permission) !== -1
+  },
+
+  templateHelpers: function () {
+    return { canBulkDelete: this.hasPermission('missions.delete') }
+  },
+
+  selectAll: function (event) {
+    this.$('.select-item').prop('checked', event.target.checked)
+    this.selectionChanged()
+  },
+
+  selectionChanged: function () {
+    const selected = this.$('.select-item:checked').length
+    const total = this.$('.select-item').length
+    this.$('.selected-count').text(selected)
+    this.$('.delete-selected').prop('disabled', selected === 0)
+    this.$('.select-all-items').prop('checked', total > 0 && selected === total)
+  },
+
+  deleteSelected: function () {
+    const self = this
+    const names = this.$('.select-item:checked').map(function () { return this.value }).get()
+    if (!names.length || !this.hasPermission('missions.delete')) return
+    sweetAlert({
+      title: 'Delete ' + names.length + ' missions?',
+      text: 'All selected missions will be deleted from the server.',
+      type: 'warning',
+      showCancelButton: true,
+      confirmButtonClass: 'btn-danger',
+      confirmButtonText: 'Delete selected'
+    }, function () {
+      self.$('.delete-selected').prop('disabled', true)
+      $.ajax({
+        url: '/api/missions/bulk-delete',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ names }),
+        success: function () { self.collection.fetch() },
+        error: function (resp) {
+          sweetAlert({ title: 'Delete failed', text: resp.responseText || 'Unable to delete selected missions', type: 'error' })
+          self.selectionChanged()
+        }
+      })
+    })
   },
 
   buildChildView: function (item, ChildViewType, childViewOptions) {
