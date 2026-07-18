@@ -20,7 +20,7 @@ module.exports = function (updates, accessControl, auditLog) {
 
       updates.download(status, function (err, downloaded) {
         if (err) return res.status(502).send(err.message)
-        const script = path.join(updates.projectRoot, 'scripts', 'update-helper.js')
+        const script = path.join(updates.projectRoot, 'scripts', 'update-runner.bat')
         const updateRoot = path.join(updates.projectRoot, '.updates')
         fs.mkdirSync(updateRoot, { recursive: true })
         const logPath = path.join(updateRoot, 'update.log')
@@ -35,11 +35,12 @@ module.exports = function (updates, accessControl, auditLog) {
         fs.appendFileSync(logPath, '\r\n[' + new Date().toISOString() + '] UPDATE REQUEST ACCEPTED\r\n')
         fs.appendFileSync(logPath, '[' + new Date().toISOString() + '] Panel PID: ' + process.pid + '\r\n')
         fs.appendFileSync(logPath, '[' + new Date().toISOString() + '] Node executable: ' + process.execPath + '\r\n')
-        fs.appendFileSync(logPath, '[' + new Date().toISOString() + '] Helper script: ' + script + '\r\n')
-        const args = [script, '--manifest', downloaded.manifestPath, '--root', updates.projectRoot, '--pid', String(process.pid)]
-        // On Windows detached=true creates a separate console. windowsHide=false and
-        // inherited stdout/stderr make every updater message visible to the operator.
-        const child = spawn(process.execPath, args, { detached: true, stdio: ['ignore', 'inherit', 'inherit'], windowsHide: false })
+        fs.appendFileSync(logPath, '[' + new Date().toISOString() + '] Batch runner: ' + script + '\r\n')
+        const cmd = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'cmd.exe')
+        const args = ['/d', '/c', 'call', script, downloaded.manifestPath, updates.projectRoot, String(process.pid), process.execPath]
+        // The detached cmd process owns a separate, visible console and survives
+        // termination of the panel process that launched it.
+        const child = spawn(cmd, args, { detached: true, stdio: ['ignore', 'inherit', 'inherit'], windowsHide: false })
         fs.appendFileSync(logPath, '[' + new Date().toISOString() + '] Updater spawned with PID ' + child.pid + '\r\n')
         child.on('error', function (spawnError) {
           const message = 'Unable to start updater: ' + spawnError.message

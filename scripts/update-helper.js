@@ -123,7 +123,12 @@ try {
 
   log('Waiting for HTTP response to be delivered')
   sleep(2500)
-  stopAndVerifyPanel(panelPid)
+  if (args['skip-stop'] === 'true') {
+    if (isProcessRunning(panelPid)) throw new Error('Batch runner reported the panel stopped, but PID ' + panelPid + ' is still running')
+    log('VERIFIED AGAIN: panel PID ' + panelPid + ' is not running')
+  } else {
+    stopAndVerifyPanel(panelPid)
+  }
 
   copyApplication(installRoot, backupRoot)
   log('Backup created at ' + backupRoot)
