@@ -32,10 +32,15 @@ module.exports = function (updates, accessControl, auditLog) {
           updatedAt: new Date().toISOString(),
           package: path.basename(downloaded.packagePath)
         }, null, 2))
-        fs.appendFileSync(logPath, '\r\n[' + new Date().toISOString() + '] Launching external updater with ' + process.execPath + '\r\n')
-        const log = fs.openSync(logPath, 'a')
+        fs.appendFileSync(logPath, '\r\n[' + new Date().toISOString() + '] UPDATE REQUEST ACCEPTED\r\n')
+        fs.appendFileSync(logPath, '[' + new Date().toISOString() + '] Panel PID: ' + process.pid + '\r\n')
+        fs.appendFileSync(logPath, '[' + new Date().toISOString() + '] Node executable: ' + process.execPath + '\r\n')
+        fs.appendFileSync(logPath, '[' + new Date().toISOString() + '] Helper script: ' + script + '\r\n')
         const args = [script, '--manifest', downloaded.manifestPath, '--root', updates.projectRoot, '--pid', String(process.pid)]
-        const child = spawn(process.execPath, args, { detached: true, stdio: ['ignore', log, log], windowsHide: true })
+        // On Windows detached=true creates a separate console. windowsHide=false and
+        // inherited stdout/stderr make every updater message visible to the operator.
+        const child = spawn(process.execPath, args, { detached: true, stdio: ['ignore', 'inherit', 'inherit'], windowsHide: false })
+        fs.appendFileSync(logPath, '[' + new Date().toISOString() + '] Updater spawned with PID ' + child.pid + '\r\n')
         child.on('error', function (spawnError) {
           const message = 'Unable to start updater: ' + spawnError.message
           fs.appendFileSync(logPath, '[' + new Date().toISOString() + '] ' + message + '\r\n')
@@ -48,7 +53,6 @@ module.exports = function (updates, accessControl, auditLog) {
           }, null, 2))
         })
         child.unref()
-        fs.closeSync(log)
         auditLog.record(req, 'updates.install', { from: status.currentVersion, to: status.latestVersion, source: status.packageUrl })
         res.status(202).json({ accepted: true, from: status.currentVersion, to: status.latestVersion, log: '.updates/update.log' })
       })
